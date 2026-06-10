@@ -1,11 +1,10 @@
-import type { Timelapse } from '../types/api';
+import type { Timelapse } from '../types/viewer';
 
 interface TimelapsePanelProps {
   timelapses: Timelapse[];
 }
 
-function formatGenerated(iso: string | null): string {
-  if (!iso) return '';
+function formatTime(iso: string): string {
   return new Date(iso).toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -15,8 +14,9 @@ function formatGenerated(iso: string | null): string {
 }
 
 const durationLabels: Record<string, string> = {
-  '1h': 'Last 1-Hour Timelapse',
-  '12h': 'Last 12-Hour Timelapse',
+  '1h': '1-Hour Timelapse',
+  '12h': '12-Hour Timelapse',
+  '24h': '24-Hour Timelapse',
 };
 
 export function TimelapsePanel({ timelapses }: TimelapsePanelProps) {
@@ -27,7 +27,7 @@ export function TimelapsePanel({ timelapses }: TimelapsePanelProps) {
           <span className="panel__title">Timelapses</span>
         </div>
         <div className="panel__body">
-          <span style={{ color: 'var(--text-muted)' }}>No timelapses available</span>
+          <span className="meta-muted">No timelapses available</span>
         </div>
       </div>
     );
@@ -41,37 +41,27 @@ export function TimelapsePanel({ timelapses }: TimelapsePanelProps) {
       <div className="panel__body">
         <div className="timelapse-list">
           {timelapses.map((tl) => {
-            const playable = tl.status === 'ready' && tl.videoUrl;
-            const ready = tl.status === 'ready' && !tl.videoUrl;
-            const generating = tl.status === 'generating';
-
-            let sub: string;
-            if (playable) sub = `Generated ${formatGenerated(tl.generatedAt)}`;
-            else if (ready) sub = `Generated ${formatGenerated(tl.generatedAt)} — no URL yet`;
-            else if (generating) sub = 'Generating…';
-            else sub = 'Unavailable';
-
-            let icon: string;
-            if (playable) icon = '▶';
-            else if (ready) icon = '◉';
-            else if (generating) icon = '⟳';
-            else icon = '■';
+            const window = `${formatTime(tl.windowStartUtc)} – ${formatTime(tl.windowEndUtc)}`;
+            const stats = tl.sourceCount != null
+              ? `${tl.sourceCount} frames${tl.missingCount ? `, ${tl.missingCount} missing` : ''}`
+              : '';
 
             return (
-              <a
-                key={`${tl.deviceId}-${tl.duration}`}
-                href={tl.videoUrl ?? undefined}
-                className={`timelapse-link ${playable ? 'timelapse-link--available' : 'timelapse-link--unavailable'}`}
-                onClick={(e) => { if (!playable) e.preventDefault(); }}
-              >
-                <div className="timelapse-link__icon">{icon}</div>
-                <div className="timelapse-link__info">
-                  <div className="timelapse-link__title">
-                    {durationLabels[tl.duration] ?? tl.duration}
-                  </div>
-                  <div className="timelapse-link__sub">{sub}</div>
+              <div key={`${tl.deviceId}-${tl.duration}`} className="timelapse-card">
+                <div className="timelapse-card__label">
+                  {durationLabels[tl.duration] ?? tl.duration}
                 </div>
-              </a>
+                <video
+                  src={tl.videoUrl}
+                  controls
+                  preload="metadata"
+                  className="timelapse-card__video"
+                />
+                <div className="timelapse-card__meta">
+                  <span className="timelapse-card__sub">{window}</span>
+                  {stats && <span className="timelapse-card__sub">{stats}</span>}
+                </div>
+              </div>
             );
           })}
         </div>

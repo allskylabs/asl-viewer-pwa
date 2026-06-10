@@ -1,8 +1,7 @@
-import type { DeviceSummary } from '../types/api';
-import { StatusBadge } from './StatusBadge';
+import type { Device } from '../types/viewer';
 
 interface DeviceSelectorProps {
-  devices: DeviceSummary[];
+  devices: Device[];
   selectedId: string;
   onSelect: (id: string) => void;
 }
@@ -17,24 +16,31 @@ function formatLastSeen(iso: string): string {
   return `${Math.floor(diffHr / 24)}d ago`;
 }
 
+function isOnline(lastSeenUtc: string): boolean {
+  return Date.now() - new Date(lastSeenUtc).getTime() < 5 * 60_000;
+}
+
 export function DeviceSelector({ devices, selectedId, onSelect }: DeviceSelectorProps) {
   return (
-    <nav className="device-selector">
-      <div className="device-selector__heading">Devices</div>
-      {devices.map((d) => (
-        <button
-          key={d.deviceId}
-          className={`device-card${d.deviceId === selectedId ? ' device-card--selected' : ''}`}
-          onClick={() => onSelect(d.deviceId)}
-        >
-          <div className="device-card__info">
-            <div className="device-card__name">{d.deviceId}</div>
-            <div className="device-card__site">{d.siteName}</div>
-            <div className="device-card__last-seen">{formatLastSeen(d.lastSeen)}</div>
-          </div>
-          <StatusBadge online={d.online} />
-        </button>
-      ))}
-    </nav>
+    <div className="device-list">
+      {devices.map((d) => {
+        const online = isOnline(d.lastSeenUtc);
+        return (
+          <button
+            key={d.deviceId}
+            className={`device-card${d.deviceId === selectedId ? ' device-card--selected' : ''}`}
+            onClick={() => onSelect(d.deviceId)}
+          >
+            <div className="device-card__info">
+              <div className="device-card__name">{d.label}</div>
+              <div className="device-card__meta">
+                {d.siteId} &middot; {formatLastSeen(d.lastSeenUtc)}
+              </div>
+            </div>
+            <span className={`status-dot status-dot--${online ? 'online' : 'offline'}`} />
+          </button>
+        );
+      })}
+    </div>
   );
 }
