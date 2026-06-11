@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] - 2026-06-11
+
+### Added
+
+- Live browser clock in the header displaying local time (HH:MM:SS AM/PM), updated every second via a self-contained `LiveClock` component.
+- Clock uses tabular-nums to prevent layout jitter; "Updated" timestamp also uses tabular-nums now.
+- Clock hidden on small phones (≤480px); compacted at ≤700px. "Updated" timestamp remains hidden at ≤700px as before.
+
+## [0.2.7] - 2026-06-11
+
+### Changed
+
+- Device status (online/stale/offline) is now computed server-side in the `/dev-api/devices` response, with `latestCaptureUtc`, `status`, and `statusAgeSeconds` fields per device.
+- All device list dots use the backend-provided status — non-selected devices stay current without requiring selection.
+- Device list polls every 60 seconds (with visibility pause/resume) so all device statuses refresh automatically.
+- DeviceSelector simplified: removed `statusOverrides` prop and client-side status calculation in favor of `device.status` from the API.
+- Selected Device Status panel uses backend `status` for the badge and the freshest available timestamp for age display.
+- Capture auto-refresh remains at 30 seconds; timelapse refresh remains manual only.
+
 ## [0.2.6] - 2026-06-11
 
 ### Fixed
@@ -127,6 +146,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build-time version injection via Vite define.
 - Lazy loading on thumbnail images.
 
+[0.2.8]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.7...v0.2.8
+[0.2.7]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.3...v0.2.4

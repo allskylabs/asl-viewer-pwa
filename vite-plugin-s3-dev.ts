@@ -24,6 +24,16 @@ function parseConfig(env: Record<string, string>): S3DevConfig {
   };
 }
 
+type DeviceStatus = 'online' | 'stale' | 'offline';
+
+function computeDeviceStatus(latestCaptureUtc: string | null): { status: DeviceStatus; statusAgeSeconds: number | null } {
+  if (!latestCaptureUtc) return { status: 'offline', statusAgeSeconds: null };
+  const ageSeconds = Math.round((Date.now() - new Date(latestCaptureUtc).getTime()) / 1000);
+  if (ageSeconds <= 120) return { status: 'online', statusAgeSeconds: ageSeconds };
+  if (ageSeconds <= 600) return { status: 'stale', statusAgeSeconds: ageSeconds };
+  return { status: 'offline', statusAgeSeconds: ageSeconds };
+}
+
 function parseTimestampFromCaptureId(captureId: string): string | null {
   const m = captureId.match(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/);
   if (!m) return null;
@@ -135,11 +145,16 @@ async function handleDevices(
       }
     }
 
+    const { status, statusAgeSeconds } = computeDeviceStatus(lastSeenUtc);
+
     devices.push({
       deviceId,
       siteId: cfg.siteId,
       label: deviceId,
       lastSeenUtc: lastSeenUtc ?? new Date(0).toISOString(),
+      latestCaptureUtc: lastSeenUtc ?? null,
+      status,
+      statusAgeSeconds,
       lastMode,
     });
   }

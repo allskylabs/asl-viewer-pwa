@@ -1,11 +1,16 @@
 export type CaptureMode = 'day' | 'twilight' | 'night';
 export type TimelapseDuration = '1h' | '12h' | '24h';
 
+export type DeviceStatus = 'online' | 'stale' | 'offline';
+
 export interface Device {
   deviceId: string;
   siteId: string;
   label: string;
   lastSeenUtc: string;
+  latestCaptureUtc: string | null;
+  status: DeviceStatus;
+  statusAgeSeconds: number | null;
   lastMode: CaptureMode | null;
 }
 

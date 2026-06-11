@@ -1,3 +1,5 @@
+import { LiveClock } from './LiveClock';
+
 interface AppHeaderProps {
   onRefresh?: () => void;
   refreshing?: boolean;
@@ -17,6 +19,7 @@ export function AppHeader({ onRefresh, refreshing, lastRefreshedAt }: AppHeaderP
     <header className="app-header">
       <img src="/logo-horizontal.png" alt="AllskyLabs" className="app-header__logo" />
       <div className="app-header__actions">
+        <LiveClock />
         {onRefresh && (
           <>
             {lastRefreshedAt && (

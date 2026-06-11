@@ -26,15 +26,6 @@ function formatAge(iso: string): string {
   return `${Math.floor(hr / 24)}d ago`;
 }
 
-type DeviceStatus = 'online' | 'stale' | 'offline';
-
-function getDeviceStatus(latestTimestamp: string): DeviceStatus {
-  const ageMs = Date.now() - new Date(latestTimestamp).getTime();
-  if (ageMs < 2 * 60_000) return 'online';
-  if (ageMs < 10 * 60_000) return 'stale';
-  return 'offline';
-}
-
 const RANGE_HOURS: Record<string, number> = { '1h': 1, '6h': 6, '12h': 12, '24h': 24 };
 
 export default function App() {
@@ -318,6 +309,42 @@ export default function App() {
     };
   }, [selectedDeviceId]);
 
+  useEffect(() => {
+    const INTERVAL = 60_000;
+    let id: ReturnType<typeof setInterval> | null = null;
+    let inflight = false;
+
+    async function tick() {
+      if (inflight) return;
+      inflight = true;
+      try {
+        const fresh = await listDevices();
+        setDevices(fresh);
+      } catch {
+        // silent — manual refresh surfaces errors
+      } finally {
+        inflight = false;
+      }
+    }
+
+    function start() {
+      if (!id) id = setInterval(tick, INTERVAL);
+    }
+    function stop() {
+      if (id) { clearInterval(id); id = null; }
+    }
+    function onVisibility() {
+      if (document.hidden) stop(); else start();
+    }
+
+    start();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
   if (loading) {
     return (
       <div className="app-layout">
@@ -369,8 +396,9 @@ export default function App() {
     );
   }
 
-  const latestCaptureTimestamp = captures.length > 0 ? captures[0].timestamp : selectedDevice.lastSeenUtc;
-  const deviceStatus = getDeviceStatus(latestCaptureTimestamp);
+  const latestCaptureTimestamp = captures.length > 0
+    ? captures[0].timestamp
+    : (selectedDevice.latestCaptureUtc ?? selectedDevice.lastSeenUtc);
 
   return (
     <div className="app-layout">
@@ -388,7 +416,6 @@ export default function App() {
                 devices={devices}
                 selectedId={selectedDevice.deviceId}
                 onSelect={setSelectedDeviceId}
-                statusOverrides={{ [selectedDevice.deviceId]: deviceStatus }}
               />
             </div>
           </div>
@@ -399,9 +426,9 @@ export default function App() {
                 <div className="rail-kv">
                   <span className="rail-kv__label">Status</span>
                   <span className="rail-kv__value">
-                    <span className={`status-badge status-badge--${deviceStatus}`}>
+                    <span className={`status-badge status-badge--${selectedDevice.status}`}>
                       <span className="status-badge__dot" />
-                      <span className="status-badge__label">{deviceStatus}</span>
+                      <span className="status-badge__label">{selectedDevice.status}</span>
                     </span>
                   </span>
                 </div>
