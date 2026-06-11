@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 2026-06-11
+
+### Fixed
+
+- Device list status dots now use the same capture-derived status as the Device Status panel. Previously, dots used the device list `lastSeenUtc` while the panel used the latest capture timestamp, causing them to disagree.
+
+## [0.2.5] - 2026-06-11
+
+### Changed
+
+- Device status now uses three states: online (<2m), stale (2–10m), offline (>10m), derived from the latest capture timestamp instead of the device list `lastSeenUtc`.
+- Status dot colors: green (online), yellow (stale), red (offline) — in both the left rail badge and the device list dot.
+- Renamed "Last seen" to "Latest image" to reflect the capture-based freshness source.
+- Renamed "Current Capture / Age" to "Selected Capture / Viewing" to distinguish the displayed image from the latest available.
+- Added "Data refreshed" row showing when the UI last checked for updates.
+
+## [0.2.4] - 2026-06-11
+
+### Changed
+
+- Auto-refresh interval slowed from 10 seconds to 30 seconds for a calmer live view.
+- Timelapses refresh only on manual Refresh, not on the auto-refresh interval.
+
+## [0.2.3] - 2026-06-11
+
+### Fixed
+
+- Removed automatic scrollIntoView on filmstrip selection change. Auto-refresh no longer scrolls the page down to the filmstrip every 10 seconds.
+
+## [0.2.2] - 2026-06-11
+
+### Fixed
+
+- Auto-refresh now forces the main image to the newest capture every 10 seconds instead of only updating the filmstrip/capture list.
+- Main image `<img>` keyed by captureId so React/browser treats each new capture as a distinct element.
+
 ## [0.2.1] - 2026-06-11
 
 ### Fixed
@@ -91,6 +127,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build-time version injection via Vite define.
 - Lazy loading on thumbnail images.
 
+[0.2.6]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.1.1...v0.1.2

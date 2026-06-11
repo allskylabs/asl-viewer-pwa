@@ -1,9 +1,12 @@
 import type { Device } from '../types/viewer';
 
+export type DeviceStatus = 'online' | 'stale' | 'offline';
+
 interface DeviceSelectorProps {
   devices: Device[];
   selectedId: string;
   onSelect: (id: string) => void;
+  statusOverrides?: Record<string, DeviceStatus>;
 }
 
 function formatLastSeen(iso: string): string {
@@ -16,15 +19,18 @@ function formatLastSeen(iso: string): string {
   return `${Math.floor(diffHr / 24)}d ago`;
 }
 
-function isOnline(lastSeenUtc: string): boolean {
-  return Date.now() - new Date(lastSeenUtc).getTime() < 5 * 60_000;
+function getStatus(lastSeenUtc: string): 'online' | 'stale' | 'offline' {
+  const ageMs = Date.now() - new Date(lastSeenUtc).getTime();
+  if (ageMs < 2 * 60_000) return 'online';
+  if (ageMs < 10 * 60_000) return 'stale';
+  return 'offline';
 }
 
-export function DeviceSelector({ devices, selectedId, onSelect }: DeviceSelectorProps) {
+export function DeviceSelector({ devices, selectedId, onSelect, statusOverrides }: DeviceSelectorProps) {
   return (
     <div className="device-list">
       {devices.map((d) => {
-        const online = isOnline(d.lastSeenUtc);
+        const status = statusOverrides?.[d.deviceId] ?? getStatus(d.lastSeenUtc);
         return (
           <button
             key={d.deviceId}
@@ -37,7 +43,7 @@ export function DeviceSelector({ devices, selectedId, onSelect }: DeviceSelector
                 {d.siteId} &middot; {formatLastSeen(d.lastSeenUtc)}
               </div>
             </div>
-            <span className={`status-dot status-dot--${online ? 'online' : 'offline'}`} />
+            <span className={`status-dot status-dot--${status}`} />
           </button>
         );
       })}

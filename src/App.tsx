@@ -26,8 +26,13 @@ function formatAge(iso: string): string {
   return `${Math.floor(hr / 24)}d ago`;
 }
 
-function isOnline(lastSeenUtc: string): boolean {
-  return Date.now() - new Date(lastSeenUtc).getTime() < 5 * 60_000;
+type DeviceStatus = 'online' | 'stale' | 'offline';
+
+function getDeviceStatus(latestTimestamp: string): DeviceStatus {
+  const ageMs = Date.now() - new Date(latestTimestamp).getTime();
+  if (ageMs < 2 * 60_000) return 'online';
+  if (ageMs < 10 * 60_000) return 'stale';
+  return 'offline';
 }
 
 const RANGE_HOURS: Record<string, number> = { '1h': 1, '6h': 6, '12h': 12, '24h': 24 };
@@ -275,7 +280,7 @@ export default function App() {
 
   useEffect(() => {
     if (!selectedDeviceId) return;
-    const INTERVAL = 10_000;
+    const INTERVAL = 30_000;
     let id: ReturnType<typeof setInterval> | null = null;
     let inflight = false;
 
@@ -285,6 +290,9 @@ export default function App() {
       try {
         const result = await listCaptures(selectedDeviceId!, { limit: 100 });
         setAllCaptures(result.captures);
+        followLatestRef.current = true;
+        setSelectedCapture(result.captures[0] ?? null);
+        setLastRefreshedAt(new Date());
       } catch {
         // silent — manual refresh surfaces errors
       } finally {
@@ -361,7 +369,8 @@ export default function App() {
     );
   }
 
-  const online = isOnline(selectedDevice.lastSeenUtc);
+  const latestCaptureTimestamp = captures.length > 0 ? captures[0].timestamp : selectedDevice.lastSeenUtc;
+  const deviceStatus = getDeviceStatus(latestCaptureTimestamp);
 
   return (
     <div className="app-layout">
@@ -379,6 +388,7 @@ export default function App() {
                 devices={devices}
                 selectedId={selectedDevice.deviceId}
                 onSelect={setSelectedDeviceId}
+                statusOverrides={{ [selectedDevice.deviceId]: deviceStatus }}
               />
             </div>
           </div>
@@ -389,28 +399,28 @@ export default function App() {
                 <div className="rail-kv">
                   <span className="rail-kv__label">Status</span>
                   <span className="rail-kv__value">
-                    <span className={`status-badge status-badge--${online ? 'online' : 'offline'}`}>
+                    <span className={`status-badge status-badge--${deviceStatus}`}>
                       <span className="status-badge__dot" />
-                      <span className="status-badge__label">{online ? 'online' : 'offline'}</span>
+                      <span className="status-badge__label">{deviceStatus}</span>
                     </span>
                   </span>
                 </div>
                 <div className="rail-kv">
-                  <span className="rail-kv__label">Last seen</span>
-                  <span className="rail-kv__value">{formatAge(selectedDevice.lastSeenUtc)}</span>
+                  <span className="rail-kv__label">Latest image</span>
+                  <span className="rail-kv__value">{formatAge(latestCaptureTimestamp)}</span>
                 </div>
-                {selectedDevice.lastMode && (
+                {lastRefreshedAt && (
                   <div className="rail-kv">
-                    <span className="rail-kv__label">Mode</span>
-                    <span className="rail-kv__value">{selectedDevice.lastMode}</span>
+                    <span className="rail-kv__label">Data refreshed</span>
+                    <span className="rail-kv__value">{formatAge(lastRefreshedAt.toISOString())}</span>
                   </div>
                 )}
               </div>
               {selectedCapture && (
                 <div className="rail-card">
-                  <div className="rail-card__title">Current Capture</div>
+                  <div className="rail-card__title">Selected Capture</div>
                   <div className="rail-kv">
-                    <span className="rail-kv__label">Age</span>
+                    <span className="rail-kv__label">Viewing</span>
                     <span className="rail-kv__value">{formatAge(selectedCapture.timestamp)}</span>
                   </div>
                   {selectedCapture.mode && (

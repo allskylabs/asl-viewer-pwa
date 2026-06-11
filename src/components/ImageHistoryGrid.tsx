@@ -1,4 +1,4 @@
-import { useEffect, useRef, memo } from 'react';
+import { memo } from 'react';
 import type { Capture } from '../types/viewer';
 
 interface ImageHistoryGridProps {
@@ -18,12 +18,6 @@ function formatTime(iso: string): string {
 }
 
 export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selectedId, onSelect, title }: ImageHistoryGridProps) {
-  const selectedRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    selectedRef.current?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
-  }, [selectedId]);
-
   if (captures.length === 0) {
     return (
       <div className="panel">
@@ -51,7 +45,6 @@ export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selec
               return (
                 <div
                   key={cap.captureId}
-                  ref={isSelected ? selectedRef : undefined}
                   className={`image-grid__item${isSelected ? ' image-grid__item--selected' : ''}`}
                   onClick={() => onSelect(cap)}
                 >

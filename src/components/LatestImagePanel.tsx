@@ -95,7 +95,7 @@ export const LatestImagePanel = memo(function LatestImagePanel({
       <div className="panel__body">
         <div className="latest-image">
           <div className="latest-image__viewer">
-            <img src={capture.imageUrl} alt={`Capture ${capture.captureId}`} />
+            <img key={capture.captureId} src={capture.imageUrl} alt={`Capture ${capture.captureId}`} />
           </div>
           <div className="latest-image__meta">
             <span className="latest-image__tag">
