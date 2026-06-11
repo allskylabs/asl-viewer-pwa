@@ -57,6 +57,7 @@ export interface TimelapseListItem {
   windowStartUtc: string;
   windowEndUtc: string;
   videoUrl: string;
+  posterUrl: string | null;
   sourceCount: number | null;
   expectedSourceCount: number | null;
   missingCount: number | null;

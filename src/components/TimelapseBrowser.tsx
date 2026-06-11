@@ -153,8 +153,27 @@ export function TimelapseBrowser({ deviceId, onClose }: TimelapseBrowserProps) {
                   className={`tl-browser__row${isActive ? ' tl-browser__row--active' : ''}`}
                   onClick={() => setActiveItem(tl)}
                 >
-                  <span className="tl-browser__row-duration">{tl.duration}</span>
+                  <div className="tl-browser__row-thumb">
+                    {tl.posterUrl ? (
+                      <img
+                        src={tl.posterUrl}
+                        alt=""
+                        loading="lazy"
+                        className="tl-browser__row-thumb-img"
+                      />
+                    ) : (
+                      <div className="tl-browser__row-thumb-placeholder">
+                        <span className="tl-browser__row-thumb-badge">{tl.duration}</span>
+                        <span className="tl-browser__row-thumb-range">
+                          {formatLocalTime(tl.windowStartUtc)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   <div className="tl-browser__row-info">
+                    <span className="tl-browser__row-title">
+                      {tl.duration} timelapse
+                    </span>
                     <span className="tl-browser__row-window">
                       {formatLocalTime(tl.windowStartUtc)} – {formatLocalTime(tl.windowEndUtc)}
                     </span>

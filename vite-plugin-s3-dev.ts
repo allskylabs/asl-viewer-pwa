@@ -337,12 +337,15 @@ async function handleListTimelapses(
   const durations: ('1h' | '12h' | '24h')[] =
     durationParam === 'all' ? ['1h', '12h', '24h'] : [durationParam as '1h' | '12h' | '24h'];
 
+  const POSTER_EXTS = ['.jpg', '.webp', '.png'];
+
   const now = new Date();
   const allEntries: {
     duration: string;
     windowStartUtc: string;
     windowEndUtc: string;
     videoUrl: string;
+    posterKey: string | null;
     sourceCount: number | null;
     expectedSourceCount: number | null;
     missingCount: number | null;
@@ -355,6 +358,7 @@ async function handleListTimelapses(
       const date = new Date(now.getTime() - daysBack * 86400_000);
       const prefix = timelapsePrefix(cfg.siteId, deviceId, date, duration);
       const keys = await listS3Keys(s3, cfg.bucket, prefix);
+      const keySet = new Set(keys);
       const mp4Keys = keys.filter(k => k.endsWith('.mp4'));
 
       for (const mp4Key of mp4Keys) {
@@ -373,11 +377,15 @@ async function handleListTimelapses(
           // sidecar may not exist
         }
 
+        const baseName = mp4Key.replace(/\.mp4$/, '');
+        const posterKey = POSTER_EXTS.map(ext => baseName + ext).find(k => keySet.has(k)) ?? null;
+
         allEntries.push({
           duration,
           windowStartUtc: (sidecar?.['window_start_utc'] as string) ?? parsed.start,
           windowEndUtc: (sidecar?.['window_end_utc'] as string) ?? parsed.end,
           videoUrl: await presign(s3, cfg.bucket, mp4Key),
+          posterKey,
           sourceCount: (sidecar?.['source_count'] as number) ?? null,
           expectedSourceCount: (sidecar?.['expected_source_count'] as number) ?? null,
           missingCount: (sidecar?.['missing_hours_utc'] as unknown[])?.length ?? null,
@@ -389,22 +397,25 @@ async function handleListTimelapses(
   }
 
   allEntries.sort((a, b) => b.windowEndUtc.localeCompare(a.windowEndUtc));
+  const sliced = allEntries.slice(0, limit);
 
-  return {
-    deviceId,
-    timelapses: allEntries.slice(0, limit).map(e => ({
+  const timelapses = await Promise.all(
+    sliced.map(async (e) => ({
       deviceId,
       duration: e.duration,
       windowStartUtc: e.windowStartUtc,
       windowEndUtc: e.windowEndUtc,
       videoUrl: e.videoUrl,
+      posterUrl: e.posterKey ? await presign(s3, cfg.bucket, e.posterKey) : null,
       sourceCount: e.sourceCount,
       expectedSourceCount: e.expectedSourceCount,
       missingCount: e.missingCount,
       generatedAtUtc: e.generatedAtUtc,
       key: e.key,
     })),
-  };
+  );
+
+  return { deviceId, timelapses };
 }
 
 async function handleSidecar(
