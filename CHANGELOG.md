@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-06-11
+
+### Fixed
+
+- Manual Refresh now always jumps to the newest capture instead of preserving a previously browsed older capture. Pressing Refresh means "show me the latest."
+
+## [0.2.0] - 2026-06-10
+
+### Added
+
+- Time range selector: filter captures by Latest, 1h, 6h, 12h, or 24h using pill-style toggle buttons above the filmstrip.
+- Jump-to-time control: pick a local date/time and jump to the nearest available capture. Shows inline feedback with the matched capture's time and distance from the target.
+- Keyboard shortcut `T` to focus the jump-to-time input.
+- Filmstrip title updates to reflect the active time range (e.g., "Captures — Last 6h").
+- Capture data now loads up to 100 recent captures (up from 30) to support wider time ranges.
+- Time range, jump-to-time, and filmstrip are responsive across all breakpoints with 44px touch targets on mobile.
+
+### Changed
+
+- Filmstrip panel (`ImageHistoryGrid`) accepts an optional `title` prop for dynamic headings.
+- Selected capture is automatically adjusted when a range change excludes the current selection.
+- Refresh and device-switch now preserve the active time range.
+
+### Limitations (Phase 1)
+
+- Time range filtering operates on the currently loaded capture set (up to 100 most recent captures). Ranges exceeding the loaded data may not show all historical captures. This will improve when the production API adapter is available.
+- Jump-to-time searches only within loaded captures. If the target time is outside the loaded window, it selects the nearest loaded capture and shows a distance message.
+
 ## [0.1.2] - 2026-06-10
 
 ### Added
@@ -63,6 +91,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build-time version injection via Vite define.
 - Lazy loading on thumbnail images.
 
+[0.2.1]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/allskylabs/asl-viewer-pwa/releases/tag/v0.1.0

@@ -5,6 +5,7 @@ interface ImageHistoryGridProps {
   captures: Capture[];
   selectedId: string;
   onSelect: (capture: Capture) => void;
+  title?: string;
 }
 
 function formatTime(iso: string): string {
@@ -16,7 +17,7 @@ function formatTime(iso: string): string {
   });
 }
 
-export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selectedId, onSelect }: ImageHistoryGridProps) {
+export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selectedId, onSelect, title }: ImageHistoryGridProps) {
   const selectedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selec
     return (
       <div className="panel">
         <div className="panel__header">
-          <span className="panel__title">Recent Captures</span>
+          <span className="panel__title">{title ?? 'Recent Captures'}</span>
         </div>
         <div className="panel__body">
           <span className="meta-muted">No captures available</span>
@@ -39,7 +40,7 @@ export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selec
   return (
     <div className="panel">
       <div className="panel__header">
-        <span className="panel__title">Recent Captures</span>
+        <span className="panel__title">{title ?? 'Recent Captures'}</span>
         <span className="capture-nav__pos">{captures.length} images</span>
       </div>
       <div className="panel__body">
