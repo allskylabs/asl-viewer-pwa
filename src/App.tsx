@@ -4,6 +4,7 @@ import {
   listCaptures,
   getLatestTimelapse,
   getCaptureSidecar,
+  clearSidecarCache,
 } from './services/viewerService';
 import { AppHeader } from './components/AppHeader';
 import { DeviceSelector } from './components/DeviceSelector';
@@ -37,6 +38,9 @@ export default function App() {
   const [selectedCapture, setSelectedCapture] = useState<Capture | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     listDevices()
@@ -64,6 +68,7 @@ export default function App() {
       setTimelapse12h(tl12h);
       setTimelapse24h(tl24h);
       setSelectedCapture(captureResult.captures[0] ?? null);
+      setLastRefreshedAt(new Date());
     }).catch((err) => {
       if (!cancelled) setError(err.message);
     });
@@ -91,6 +96,34 @@ export default function App() {
     if (captureIndex > 0)
       setSelectedCapture(captures[captureIndex - 1]);
   }, [captureIndex, captures]);
+
+  const refreshDeviceData = useCallback(async () => {
+    if (!selectedDeviceId || refreshing) return;
+    setRefreshing(true);
+    setRefreshError(null);
+    clearSidecarCache();
+
+    try {
+      const [deviceList, captureResult, tl1h, tl12h, tl24h] = await Promise.all([
+        listDevices(),
+        listCaptures(selectedDeviceId, { limit: 30 }),
+        getLatestTimelapse(selectedDeviceId, '1h'),
+        getLatestTimelapse(selectedDeviceId, '12h'),
+        getLatestTimelapse(selectedDeviceId, '24h'),
+      ]);
+      setDevices(deviceList);
+      setCaptures(captureResult.captures);
+      setTimelapse1h(tl1h);
+      setTimelapse12h(tl12h);
+      setTimelapse24h(tl24h);
+      setSelectedCapture(captureResult.captures[0] ?? null);
+      setLastRefreshedAt(new Date());
+    } catch (err) {
+      setRefreshError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setRefreshing(false);
+    }
+  }, [selectedDeviceId, refreshing]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -151,6 +184,12 @@ export default function App() {
               <span className="state-message__hint">
                 Check .env.local and AWS credentials. See .env.example for setup.
               </span>
+              <button
+                className="state-message__retry"
+                onClick={() => { setError(null); setLoading(true); window.location.reload(); }}
+              >
+                Retry
+              </button>
             </div>
           </div>
         </div>
@@ -175,7 +214,11 @@ export default function App() {
 
   return (
     <div className="app-layout">
-      <AppHeader />
+      <AppHeader
+        onRefresh={refreshDeviceData}
+        refreshing={refreshing}
+        lastRefreshedAt={lastRefreshedAt}
+      />
       <div className="app-body">
         <aside className="left-rail">
           <div className="left-rail__section">
@@ -248,6 +291,23 @@ export default function App() {
         </aside>
 
         <main className="main-content">
+          {refreshError && (
+            <div className="refresh-error">
+              <div className="refresh-error__text">
+                <span className="refresh-error__title">Refresh failed</span>
+                <span className="refresh-error__detail">{refreshError}</span>
+              </div>
+              <div className="refresh-error__actions">
+                <button className="refresh-error__btn" onClick={refreshDeviceData}>Retry</button>
+                <button
+                  className="refresh-error__btn refresh-error__btn--dismiss"
+                  onClick={() => setRefreshError(null)}
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
           <LatestImagePanel
             capture={selectedCapture}
             captureIndex={captureIndex}

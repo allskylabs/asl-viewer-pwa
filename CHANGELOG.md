@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-06-10
+
+### Added
+
+- Refresh button in header to reload live S3 data for the current device.
+- Last-refreshed timestamp displayed in header (hidden on phone widths).
+- Refresh error banner with retry and dismiss actions; previous data stays visible on failure.
+- Retry button on the initial connection error screen.
+- `clearSidecarCache()` in viewerService, called on explicit refresh to ensure fresh sidecar data.
+
+### Changed
+
+- Sidecar cache is cleared when user explicitly refreshes, but preserved during normal navigation.
+- Refresh also reloads the device list for fresh online/last-seen status.
+
 ## [0.1.0] - 2025-06-10
 
 ### Added
@@ -27,4 +42,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build-time version injection via Vite define.
 - Lazy loading on thumbnail images.
 
+[0.1.1]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/allskylabs/asl-viewer-pwa/releases/tag/v0.1.0

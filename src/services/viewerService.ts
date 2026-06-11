@@ -17,8 +17,14 @@ import * as adapter from './adapters/s3DevAdapter';
 
 // Sidecar JSON is immutable per capture — safe to cache for the session.
 // The inflight map deduplicates concurrent requests for the same key.
+// clearSidecarCache() is exposed for explicit refresh actions.
 const sidecarCache = new Map<string, Record<string, unknown> | null>();
 const sidecarInflight = new Map<string, Promise<Record<string, unknown> | null>>();
+
+export function clearSidecarCache(): void {
+  sidecarCache.clear();
+  sidecarInflight.clear();
+}
 
 export async function listDevices(): Promise<Device[]> {
   return adapter.listDevices();
