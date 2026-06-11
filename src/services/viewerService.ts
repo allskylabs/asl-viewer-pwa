@@ -11,6 +11,7 @@ import type {
   Timelapse,
   TimelapseDuration,
   CaptureListResult,
+  TimelapseListResult,
 } from '../types/viewer';
 
 import * as adapter from './adapters/s3DevAdapter';
@@ -46,6 +47,13 @@ export async function getLatestTimelapse(
   duration: TimelapseDuration,
 ): Promise<Timelapse | null> {
   return adapter.getLatestTimelapse(deviceId, duration);
+}
+
+export async function listTimelapses(
+  deviceId: string,
+  opts: { duration?: string; days?: number; limit?: number } = {},
+): Promise<TimelapseListResult> {
+  return adapter.listTimelapses(deviceId, opts);
 }
 
 export async function getCaptureSidecar(

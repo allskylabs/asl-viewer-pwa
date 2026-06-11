@@ -3,6 +3,7 @@ import type { Timelapse } from '../types/viewer';
 
 interface TimelapsePanelProps {
   timelapses: Timelapse[];
+  onBrowse?: () => void;
 }
 
 function formatTime(iso: string): string {
@@ -20,12 +21,15 @@ const durationLabels: Record<string, string> = {
   '24h': '24-Hour Timelapse',
 };
 
-export const TimelapsePanel = memo(function TimelapsePanel({ timelapses }: TimelapsePanelProps) {
+export const TimelapsePanel = memo(function TimelapsePanel({ timelapses, onBrowse }: TimelapsePanelProps) {
   if (timelapses.length === 0) {
     return (
       <div className="panel">
         <div className="panel__header">
           <span className="panel__title">Timelapses</span>
+          {onBrowse && (
+            <button className="panel__header-btn" onClick={onBrowse}>Browse timelapses</button>
+          )}
         </div>
         <div className="panel__body">
           <span className="meta-muted">No timelapses available</span>
@@ -38,6 +42,9 @@ export const TimelapsePanel = memo(function TimelapsePanel({ timelapses }: Timel
     <div className="panel">
       <div className="panel__header">
         <span className="panel__title">Timelapses</span>
+        {onBrowse && (
+          <button className="panel__header-btn" onClick={onBrowse}>Browse timelapses</button>
+        )}
       </div>
       <div className="panel__body">
         <div className="timelapse-list">

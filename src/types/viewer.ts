@@ -51,6 +51,24 @@ export interface Timelapse {
   generatedAtUtc: string | null;
 }
 
+export interface TimelapseListItem {
+  deviceId: string;
+  duration: TimelapseDuration;
+  windowStartUtc: string;
+  windowEndUtc: string;
+  videoUrl: string;
+  sourceCount: number | null;
+  expectedSourceCount: number | null;
+  missingCount: number | null;
+  generatedAtUtc: string | null;
+  key: string;
+}
+
+export interface TimelapseListResult {
+  deviceId: string;
+  timelapses: TimelapseListItem[];
+}
+
 export interface CaptureListResult {
   captures: Capture[];
   hasMore: boolean;

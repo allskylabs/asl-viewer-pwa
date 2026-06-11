@@ -324,6 +324,89 @@ async function handleLatestTimelapse(
   return { deviceId, timelapse: null };
 }
 
+async function handleListTimelapses(
+  s3: S3Client,
+  cfg: S3DevConfig,
+  deviceId: string,
+  url: URL,
+): Promise<unknown> {
+  const durationParam = url.searchParams.get('duration') ?? 'all';
+  const days = Math.min(parseInt(url.searchParams.get('days') ?? '7', 10), 30);
+  const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10), 100);
+
+  const durations: ('1h' | '12h' | '24h')[] =
+    durationParam === 'all' ? ['1h', '12h', '24h'] : [durationParam as '1h' | '12h' | '24h'];
+
+  const now = new Date();
+  const allEntries: {
+    duration: string;
+    windowStartUtc: string;
+    windowEndUtc: string;
+    videoUrl: string;
+    sourceCount: number | null;
+    expectedSourceCount: number | null;
+    missingCount: number | null;
+    generatedAtUtc: string | null;
+    key: string;
+  }[] = [];
+
+  for (const duration of durations) {
+    for (let daysBack = 0; daysBack < days; daysBack++) {
+      const date = new Date(now.getTime() - daysBack * 86400_000);
+      const prefix = timelapsePrefix(cfg.siteId, deviceId, date, duration);
+      const keys = await listS3Keys(s3, cfg.bucket, prefix);
+      const mp4Keys = keys.filter(k => k.endsWith('.mp4'));
+
+      for (const mp4Key of mp4Keys) {
+        const parsed = duration === '1h'
+          ? parse1hTimelapseName(mp4Key)
+          : parseLongTimelapseName(mp4Key);
+        if (!parsed) continue;
+
+        let sidecar: Record<string, unknown> | null = null;
+        const jsonKey = mp4Key.replace('.mp4', '.json');
+        try {
+          const obj = await s3.send(new GetObjectCommand({ Bucket: cfg.bucket, Key: jsonKey }));
+          const body = await obj.Body?.transformToString();
+          if (body) sidecar = JSON.parse(body);
+        } catch {
+          // sidecar may not exist
+        }
+
+        allEntries.push({
+          duration,
+          windowStartUtc: (sidecar?.['window_start_utc'] as string) ?? parsed.start,
+          windowEndUtc: (sidecar?.['window_end_utc'] as string) ?? parsed.end,
+          videoUrl: await presign(s3, cfg.bucket, mp4Key),
+          sourceCount: (sidecar?.['source_count'] as number) ?? null,
+          expectedSourceCount: (sidecar?.['expected_source_count'] as number) ?? null,
+          missingCount: (sidecar?.['missing_hours_utc'] as unknown[])?.length ?? null,
+          generatedAtUtc: (sidecar?.['generated_at_utc'] as string) ?? null,
+          key: mp4Key,
+        });
+      }
+    }
+  }
+
+  allEntries.sort((a, b) => b.windowEndUtc.localeCompare(a.windowEndUtc));
+
+  return {
+    deviceId,
+    timelapses: allEntries.slice(0, limit).map(e => ({
+      deviceId,
+      duration: e.duration,
+      windowStartUtc: e.windowStartUtc,
+      windowEndUtc: e.windowEndUtc,
+      videoUrl: e.videoUrl,
+      sourceCount: e.sourceCount,
+      expectedSourceCount: e.expectedSourceCount,
+      missingCount: e.missingCount,
+      generatedAtUtc: e.generatedAtUtc,
+      key: e.key,
+    })),
+  };
+}
+
 async function handleSidecar(
   s3Client: S3Client,
   cfg: S3DevConfig,
@@ -391,6 +474,13 @@ export default function s3DevPlugin(env: Record<string, string>): Plugin {
           const tlMatch = path.match(/^\/dev-api\/devices\/([^/]+)\/timelapses\/latest$/);
           if (tlMatch) {
             const data = await handleLatestTimelapse(s3, cfg, tlMatch[1], url);
+            return sendJson(res, 200, data);
+          }
+
+          // GET /dev-api/devices/:id/timelapses
+          const tlListMatch = path.match(/^\/dev-api\/devices\/([^/]+)\/timelapses$/);
+          if (tlListMatch) {
+            const data = await handleListTimelapses(s3, cfg, tlListMatch[1], url);
             return sendJson(res, 200, data);
           }
 

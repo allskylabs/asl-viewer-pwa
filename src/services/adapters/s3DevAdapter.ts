@@ -10,6 +10,7 @@ import type {
   Timelapse,
   TimelapseDuration,
   CaptureListResult,
+  TimelapseListResult,
 } from '../../types/viewer';
 
 const BASE = '/dev-api';
@@ -55,6 +56,19 @@ export async function getLatestTimelapse(
     `/devices/${encodeURIComponent(deviceId)}/timelapses/latest?duration=${duration}`,
   );
   return data.timelapse;
+}
+
+export async function listTimelapses(
+  deviceId: string,
+  opts: { duration?: string; days?: number; limit?: number } = {},
+): Promise<TimelapseListResult> {
+  const params = new URLSearchParams();
+  if (opts.duration) params.set('duration', opts.duration);
+  if (opts.days) params.set('days', String(opts.days));
+  if (opts.limit) params.set('limit', String(opts.limit));
+  const qs = params.toString();
+  const path = `/devices/${encodeURIComponent(deviceId)}/timelapses${qs ? `?${qs}` : ''}`;
+  return fetchJson<TimelapseListResult>(path);
 }
 
 export async function getCaptureSidecar(

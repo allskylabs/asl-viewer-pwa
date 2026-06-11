@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-11
+
+### Added
+
+- Timelapse Browser: a new panel for browsing all available timelapses for the selected device.
+- "Browse timelapses" button in the existing Timelapses panel header toggles the browser open/closed.
+- Duration filter pills (All, 1h, 12h, 24h) and date range filter pills (Today, Yesterday, Last 7 days).
+- Each timelapse shown as a row with duration, time window, frame/missing counts, and generated timestamp.
+- Clicking a row loads the timelapse in an inline player within the browser panel.
+- New backend endpoint `GET /dev-api/devices/:id/timelapses` returns a list of available timelapses with optional `duration`, `days`, and `limit` query parameters.
+- `TimelapseListItem` and `TimelapseListResult` types, `listTimelapses()` in service and adapter layers.
+- Responsive styles: 44px touch targets at ≤900px, stacked filters at ≤700px.
+
 ## [0.2.8] - 2026-06-11
 
 ### Added
@@ -146,6 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build-time version injection via Vite define.
 - Lazy loading on thumbnail images.
 
+[0.3.0]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.8...v0.3.0
 [0.2.8]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.2.5...v0.2.6

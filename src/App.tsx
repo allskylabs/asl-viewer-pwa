@@ -12,6 +12,7 @@ import { LatestImagePanel } from './components/LatestImagePanel';
 import { ImageHistoryGrid } from './components/ImageHistoryGrid';
 import { MetadataPanel } from './components/MetadataPanel';
 import { TimelapsePanel } from './components/TimelapsePanel';
+import { TimelapseBrowser } from './components/TimelapseBrowser';
 import { TimeNavigation } from './components/TimeNavigation';
 import type { TimeRange } from './components/TimeNavigation';
 import type { Device, Capture, Timelapse } from './types/viewer';
@@ -43,6 +44,7 @@ export default function App() {
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>('latest');
   const [jumpMessage, setJumpMessage] = useState<string | null>(null);
+  const [showTimelapseBrowser, setShowTimelapseBrowser] = useState(false);
 
   const captures = useMemo(() => {
     if (timeRange === 'latest') return allCaptures.slice(0, 30);
@@ -504,7 +506,13 @@ export default function App() {
             onNewer={onNewer}
             onJumpToLatest={onJumpToLatest}
           />
-          <TimelapsePanel timelapses={timelapses} />
+          <TimelapsePanel timelapses={timelapses} onBrowse={() => setShowTimelapseBrowser(b => !b)} />
+          {showTimelapseBrowser && selectedDeviceId && (
+            <TimelapseBrowser
+              deviceId={selectedDeviceId}
+              onClose={() => setShowTimelapseBrowser(false)}
+            />
+          )}
           <TimeNavigation
             activeRange={timeRange}
             onRangeChange={handleTimeRangeChange}
