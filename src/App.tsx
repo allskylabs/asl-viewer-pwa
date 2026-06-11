@@ -46,7 +46,9 @@ export default function App() {
     listDevices()
       .then((list) => {
         setDevices(list);
-        if (list.length > 0) setSelectedDeviceId(list[0].deviceId);
+        const saved = localStorage.getItem('asl-viewer:selectedDeviceId');
+        const match = saved ? list.find(d => d.deviceId === saved) : null;
+        setSelectedDeviceId(match ? match.deviceId : list[0]?.deviceId ?? null);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -76,6 +78,12 @@ export default function App() {
     return () => { cancelled = true; };
   }, [selectedDeviceId]);
 
+  useEffect(() => {
+    if (selectedDeviceId) {
+      localStorage.setItem('asl-viewer:selectedDeviceId', selectedDeviceId);
+    }
+  }, [selectedDeviceId]);
+
   const selectedDevice = devices.find((d) => d.deviceId === selectedDeviceId);
 
   const captureIndex = selectedCapture
@@ -97,6 +105,10 @@ export default function App() {
       setSelectedCapture(captures[captureIndex - 1]);
   }, [captureIndex, captures]);
 
+  const onJumpToLatest = useCallback(() => {
+    if (captures.length > 0) setSelectedCapture(captures[0]);
+  }, [captures]);
+
   const refreshDeviceData = useCallback(async () => {
     if (!selectedDeviceId || refreshing) return;
     setRefreshing(true);
@@ -112,18 +124,23 @@ export default function App() {
         getLatestTimelapse(selectedDeviceId, '24h'),
       ]);
       setDevices(deviceList);
+      if (!deviceList.some(d => d.deviceId === selectedDeviceId)) {
+        setSelectedDeviceId(deviceList[0]?.deviceId ?? null);
+      }
       setCaptures(captureResult.captures);
       setTimelapse1h(tl1h);
       setTimelapse12h(tl12h);
       setTimelapse24h(tl24h);
-      setSelectedCapture(captureResult.captures[0] ?? null);
+      const prevId = selectedCapture?.captureId;
+      const kept = prevId ? captureResult.captures.find(c => c.captureId === prevId) : null;
+      setSelectedCapture(kept ?? captureResult.captures[0] ?? null);
       setLastRefreshedAt(new Date());
     } catch (err) {
       setRefreshError(err instanceof Error ? err.message : String(err));
     } finally {
       setRefreshing(false);
     }
-  }, [selectedDeviceId, refreshing]);
+  }, [selectedDeviceId, refreshing, selectedCapture?.captureId]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -314,6 +331,7 @@ export default function App() {
             captureCount={captures.length}
             onOlder={onOlder}
             onNewer={onNewer}
+            onJumpToLatest={onJumpToLatest}
           />
           <TimelapsePanel timelapses={timelapses} />
           <ImageHistoryGrid

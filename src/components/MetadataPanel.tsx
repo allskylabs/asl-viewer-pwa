@@ -13,11 +13,30 @@ interface MetaItem {
   label: string;
   value: string;
   full?: boolean;
+  copyValue?: string;
 }
 
 interface MetaSection {
   title: string;
   items: MetaItem[];
+}
+
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      className={`copy-btn${copied ? ' copy-btn--copied' : ''}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      title={`Copy ${label}`}
+    >
+      {copied ? 'Copied' : 'Copy'}
+    </button>
+  );
 }
 
 function fmtTime(iso: string): string {
@@ -46,9 +65,9 @@ function buildSections(capture: Capture, sidecar: Obj | null): MetaSection[] {
   const sections: MetaSection[] = [];
 
   const items: MetaItem[] = [
-    { label: 'Device', value: capture.deviceId },
+    { label: 'Device', value: capture.deviceId, copyValue: capture.deviceId },
     { label: 'Site', value: capture.siteId },
-    { label: 'Capture ID', value: capture.captureId, full: true },
+    { label: 'Capture ID', value: capture.captureId, full: true, copyValue: capture.captureId },
     { label: 'Timestamp', value: fmtTime(capture.timestamp), full: true },
   ];
 
@@ -169,7 +188,14 @@ function renderGrid(items: MetaItem[]) {
           className={`metadata-item${item.full ? ' metadata-item--full' : ''}`}
         >
           <span className="metadata-item__label">{item.label}</span>
-          <span className="metadata-item__value">{item.value}</span>
+          {item.copyValue ? (
+            <span className="metadata-item__value metadata-item__value--copyable">
+              <span className="metadata-item__text">{item.value}</span>
+              <CopyButton text={item.copyValue} label={item.label.toLowerCase()} />
+            </span>
+          ) : (
+            <span className="metadata-item__value">{item.value}</span>
+          )}
         </div>
       ))}
     </div>
@@ -235,14 +261,20 @@ export const MetadataPanel = memo(function MetadataPanel({ device, capture }: Me
 
         <div className="meta-links">
           {capture.imageUrl && (
-            <a href={capture.imageUrl} target="_blank" rel="noopener noreferrer" className="meta-link">
-              Open full image
-            </a>
+            <div className="meta-link-row">
+              <a href={capture.imageUrl} target="_blank" rel="noopener noreferrer" className="meta-link-btn">
+                Open full image
+              </a>
+              <CopyButton text={capture.imageUrl} label="image URL" />
+            </div>
           )}
           {capture.sidecarUrl && (
-            <a href={capture.sidecarUrl} target="_blank" rel="noopener noreferrer" className="meta-link">
-              Open sidecar JSON
-            </a>
+            <div className="meta-link-row">
+              <a href={capture.sidecarUrl} target="_blank" rel="noopener noreferrer" className="meta-link-btn">
+                Open sidecar JSON
+              </a>
+              <CopyButton text={capture.sidecarUrl} label="sidecar URL" />
+            </div>
           )}
         </div>
       </div>

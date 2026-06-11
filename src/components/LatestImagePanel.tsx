@@ -7,6 +7,7 @@ interface LatestImagePanelProps {
   captureCount: number;
   onOlder: () => void;
   onNewer: () => void;
+  onJumpToLatest: () => void;
 }
 
 function formatTimestamp(iso: string): string {
@@ -19,12 +20,23 @@ function formatTimestamp(iso: string): string {
   });
 }
 
+function formatAge(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(ms / 60_000);
+  if (min < 1) return 'just now';
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}h ${min % 60}m ago`;
+  return `${Math.floor(hr / 24)}d ago`;
+}
+
 export const LatestImagePanel = memo(function LatestImagePanel({
   capture,
   captureIndex,
   captureCount,
   onOlder,
   onNewer,
+  onJumpToLatest,
 }: LatestImagePanelProps) {
   if (!capture) {
     return (
@@ -49,6 +61,15 @@ export const LatestImagePanel = memo(function LatestImagePanel({
         <span className="panel__title">Capture Viewer</span>
         {captureCount > 1 && (
           <div className="capture-nav">
+            {captureIndex > 0 && (
+              <button
+                className="capture-nav__latest"
+                onClick={onJumpToLatest}
+                title="Jump to latest capture"
+              >
+                Latest
+              </button>
+            )}
             <button
               className="capture-nav__btn"
               disabled={captureIndex >= captureCount - 1}
@@ -79,6 +100,9 @@ export const LatestImagePanel = memo(function LatestImagePanel({
           <div className="latest-image__meta">
             <span className="latest-image__tag">
               {formatTimestamp(capture.timestamp)}
+            </span>
+            <span className="latest-image__tag latest-image__tag--age">
+              {formatAge(capture.timestamp)}
             </span>
             {capture.mode && (
               <span className="latest-image__tag latest-image__tag--mode">

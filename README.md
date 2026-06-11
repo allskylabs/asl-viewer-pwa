@@ -69,6 +69,13 @@ vite-plugin-s3-dev.ts              Vite plugin: S3 proxy middleware for local de
 
 The viewer uses an adapter pattern for data access. UI components call functions in `viewerService.ts`, which delegates to whichever adapter is active. During development, the S3 dev adapter fetches data through a Vite middleware that proxies to S3 with presigned URLs. When the production API is ready, swapping to an API adapter requires no component changes.
 
+## Future Notes
+
+Features under consideration (not yet implemented):
+
+- **Time scroller / timeline scrubber** — Horizontal timeline UI for scrubbing through captures by time range, replacing or augmenting the current prev/next navigation.
+- **Timelapse library browser** — Browse and play back historical timelapse videos beyond the current 1h/12h/24h latest, including date-range filtering and calendar navigation.
+
 ## Versioning
 
 This project uses [Semantic Versioning](https://semver.org/). The version in `package.json` is injected at build time into the app header via Vite's `define`. See [CHANGELOG.md](CHANGELOG.md) for release history.

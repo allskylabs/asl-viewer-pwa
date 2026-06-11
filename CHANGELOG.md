@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-06-10
+
+### Added
+
+- "Jump to latest" button in capture nav when not viewing the newest capture.
+- Capture age display ("3m ago") in the capture viewer metadata tags.
+- Copy buttons for device ID, capture ID, image URL, and sidecar URL in the metadata panel.
+- Selected device persisted to localStorage; restored on page load if device still exists.
+
+### Changed
+
+- Refresh now preserves the selected device (if still present) and selected capture (if still in list) instead of jumping to the first device/capture.
+- "Open full image" and "Open sidecar JSON" links restyled as prominent button-links with adjacent copy-URL buttons.
+- Mobile header (≤700px): flex-wrap enabled, logo reduced to 40px (32px at ≤480px) for cleaner phone presentation.
+- Small-phone header (≤480px): tighter spacing on refresh button and version label.
+- Touch-friendly "Latest" button (44px min-height) on mobile breakpoints.
+
+### Fixed
+
+- Refresh no longer loses selected device — previously always reset to first device in list.
+
 ## [0.1.1] - 2025-06-10
 
 ### Added
@@ -42,5 +63,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build-time version injection via Vite define.
 - Lazy loading on thumbnail images.
 
+[0.1.2]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/allskylabs/asl-viewer-pwa/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/allskylabs/asl-viewer-pwa/releases/tag/v0.1.0
