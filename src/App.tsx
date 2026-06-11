@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   listDevices,
   listCaptures,
   getLatestTimelapse,
+  getCaptureSidecar,
 } from './services/viewerService';
 import { AppHeader } from './components/AppHeader';
 import { DeviceSelector } from './components/DeviceSelector';
@@ -49,11 +50,7 @@ export default function App() {
 
   useEffect(() => {
     if (!selectedDeviceId) return;
-    setCaptures([]);
-    setTimelapse1h(null);
-    setTimelapse12h(null);
-    setTimelapse24h(null);
-    setSelectedCapture(null);
+    let cancelled = false;
 
     Promise.all([
       listCaptures(selectedDeviceId, { limit: 30 }),
@@ -61,12 +58,17 @@ export default function App() {
       getLatestTimelapse(selectedDeviceId, '12h'),
       getLatestTimelapse(selectedDeviceId, '24h'),
     ]).then(([captureResult, tl1h, tl12h, tl24h]) => {
+      if (cancelled) return;
       setCaptures(captureResult.captures);
       setTimelapse1h(tl1h);
       setTimelapse12h(tl12h);
       setTimelapse24h(tl24h);
       setSelectedCapture(captureResult.captures[0] ?? null);
-    }).catch((err) => setError(err.message));
+    }).catch((err) => {
+      if (!cancelled) setError(err.message);
+    });
+
+    return () => { cancelled = true; };
   }, [selectedDeviceId]);
 
   const selectedDevice = devices.find((d) => d.deviceId === selectedDeviceId);
@@ -74,6 +76,21 @@ export default function App() {
   const captureIndex = selectedCapture
     ? captures.findIndex(c => c.captureId === selectedCapture.captureId)
     : -1;
+
+  const timelapses = useMemo(
+    () => [timelapse1h, timelapse12h, timelapse24h].filter((t): t is Timelapse => t !== null),
+    [timelapse1h, timelapse12h, timelapse24h],
+  );
+
+  const onOlder = useCallback(() => {
+    if (captureIndex >= 0 && captureIndex < captures.length - 1)
+      setSelectedCapture(captures[captureIndex + 1]);
+  }, [captureIndex, captures]);
+
+  const onNewer = useCallback(() => {
+    if (captureIndex > 0)
+      setSelectedCapture(captures[captureIndex - 1]);
+  }, [captureIndex, captures]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -91,6 +108,23 @@ export default function App() {
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);
   }, [captures, captureIndex]);
+
+  useEffect(() => {
+    if (!selectedDeviceId || captureIndex < 0 || captures.length === 0) return;
+    const toPreload: string[] = [];
+    if (captureIndex > 0) {
+      toPreload.push(captures[captureIndex - 1].imageUrl);
+      getCaptureSidecar(selectedDeviceId, captures[captureIndex - 1].captureId);
+    }
+    if (captureIndex < captures.length - 1) {
+      toPreload.push(captures[captureIndex + 1].imageUrl);
+      getCaptureSidecar(selectedDeviceId, captures[captureIndex + 1].captureId);
+    }
+    toPreload.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, [selectedDeviceId, captureIndex, captures]);
 
   if (loading) {
     return (
@@ -137,7 +171,6 @@ export default function App() {
     );
   }
 
-  const timelapses = [timelapse1h, timelapse12h, timelapse24h].filter((t): t is Timelapse => t !== null);
   const online = isOnline(selectedDevice.lastSeenUtc);
 
   return (
@@ -219,14 +252,8 @@ export default function App() {
             capture={selectedCapture}
             captureIndex={captureIndex}
             captureCount={captures.length}
-            onOlder={() => {
-              if (captureIndex >= 0 && captureIndex < captures.length - 1)
-                setSelectedCapture(captures[captureIndex + 1]);
-            }}
-            onNewer={() => {
-              if (captureIndex > 0)
-                setSelectedCapture(captures[captureIndex - 1]);
-            }}
+            onOlder={onOlder}
+            onNewer={onNewer}
           />
           <TimelapsePanel timelapses={timelapses} />
           <ImageHistoryGrid

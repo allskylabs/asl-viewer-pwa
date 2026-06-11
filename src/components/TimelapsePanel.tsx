@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { Timelapse } from '../types/viewer';
 
 interface TimelapsePanelProps {
@@ -19,7 +20,7 @@ const durationLabels: Record<string, string> = {
   '24h': '24-Hour Timelapse',
 };
 
-export function TimelapsePanel({ timelapses }: TimelapsePanelProps) {
+export const TimelapsePanel = memo(function TimelapsePanel({ timelapses }: TimelapsePanelProps) {
   if (timelapses.length === 0) {
     return (
       <div className="panel">
@@ -68,4 +69,4 @@ export function TimelapsePanel({ timelapses }: TimelapsePanelProps) {
       </div>
     </div>
   );
-}
+});

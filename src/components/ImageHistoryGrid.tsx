@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import type { Capture } from '../types/viewer';
 
 interface ImageHistoryGridProps {
@@ -16,7 +16,7 @@ function formatTime(iso: string): string {
   });
 }
 
-export function ImageHistoryGrid({ captures, selectedId, onSelect }: ImageHistoryGridProps) {
+export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selectedId, onSelect }: ImageHistoryGridProps) {
   const selectedRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,4 +69,4 @@ export function ImageHistoryGrid({ captures, selectedId, onSelect }: ImageHistor
       </div>
     </div>
   );
-}
+});

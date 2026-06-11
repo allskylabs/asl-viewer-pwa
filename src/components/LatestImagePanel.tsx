@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { Capture } from '../types/viewer';
 
 interface LatestImagePanelProps {
@@ -18,7 +19,7 @@ function formatTimestamp(iso: string): string {
   });
 }
 
-export function LatestImagePanel({
+export const LatestImagePanel = memo(function LatestImagePanel({
   capture,
   captureIndex,
   captureCount,
@@ -94,4 +95,4 @@ export function LatestImagePanel({
       </div>
     </div>
   );
-}
+});

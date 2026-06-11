@@ -14,7 +14,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts", "vite-plugin-s3-dev.ts"]
+  "include": ["vite.config.ts", "vite-plugin-s3-dev.ts", "package.json"]
 }

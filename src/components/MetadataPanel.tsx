@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import type { Device, Capture } from '../types/viewer';
 import { getCaptureSidecar } from '../services/viewerService';
 
@@ -176,13 +176,15 @@ function renderGrid(items: MetaItem[]) {
   );
 }
 
-export function MetadataPanel({ device, capture }: MetadataPanelProps) {
+export const MetadataPanel = memo(function MetadataPanel({ device, capture }: MetadataPanelProps) {
   const [sidecar, setSidecar] = useState<Obj | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setSidecar(null);
-    if (!capture) return;
+    if (!capture) {
+      setSidecar(null);
+      return;
+    }
     setLoading(true);
     getCaptureSidecar(device.deviceId, capture.captureId)
       .then(setSidecar)
@@ -246,4 +248,4 @@ export function MetadataPanel({ device, capture }: MetadataPanelProps) {
       </div>
     </div>
   );
-}
+});
