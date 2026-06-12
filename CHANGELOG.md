@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-06-11
+
+### Changed
+
+- Full visual theme overhaul: night-sky navy design system replaces the GitHub-gray palette. Deep navy surface ramp (`#060b16` → `#121b30`), subtle sky-gradient page background, refined AllSkyLabs blue accent (`#5aa7ff`) with tokenized soft/strong tints.
+- Status system: calmer mint green for online, amber for stale, coral for offline; status dots get rings/glow and status badges are bordered pills so state reads without relying on color alone.
+- Header: logo right-sized (88px → 52px desktop), live clock in a bordered chip, gradient accent hairline along the header edge.
+- Panels and cards: consistent borders, softer/deeper shadows, top-edge highlight; tags become pills; tabular numerals on all timestamps and counters.
+- Design tokens added: spacing scale (`--space-1..5`), `--radius-full`, `--accent-soft`/`--accent-soft-strong`, `--panel-edge`; one-off rgba colors now derive from tokens.
+- PWA `theme-color` and manifest colors updated to match the new background.
+
+### Added
+
+- Global `:focus-visible` ring and `prefers-reduced-motion` support.
+- `docs/design-system.md` documenting the token system and placement guidance for planned features (Weather/Astro views, time scroller, overlays, advanced settings).
+
+### Fixed
+
+- Filmstrip thumbnails are now real `<button>` elements (keyboard operable, `aria-pressed`); icon-only close/nav/play buttons have `aria-label`s.
+- `Thumbs.db` ignored by git.
+
 ## [0.3.1] - 2026-06-11
 
 ### Added
