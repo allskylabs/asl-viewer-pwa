@@ -75,6 +75,7 @@ export const LatestImagePanel = memo(function LatestImagePanel({
               disabled={captureIndex >= captureCount - 1}
               onClick={onOlder}
               title="Older capture (←)"
+              aria-label="Older capture"
             >
               &#x2039;
             </button>
@@ -86,6 +87,7 @@ export const LatestImagePanel = memo(function LatestImagePanel({
               disabled={captureIndex <= 0}
               onClick={onNewer}
               title="Newer capture (→)"
+              aria-label="Newer capture"
             >
               &#x203A;
             </button>

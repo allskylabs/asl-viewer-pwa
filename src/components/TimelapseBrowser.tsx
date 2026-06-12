@@ -81,7 +81,7 @@ export function TimelapseBrowser({ deviceId, onClose }: TimelapseBrowserProps) {
     <div className="panel tl-browser">
       <div className="panel__header">
         <span className="panel__title">Timelapse Browser</span>
-        <button className="tl-browser__close" onClick={onClose}>&times;</button>
+        <button className="tl-browser__close" onClick={onClose} aria-label="Close timelapse browser">&times;</button>
       </div>
       <div className="panel__body">
         <div className="tl-browser__filters">
@@ -121,7 +121,7 @@ export function TimelapseBrowser({ deviceId, onClose }: TimelapseBrowserProps) {
               <span className="tl-browser__player-title">
                 {activeItem.duration} &mdash; {formatLocalTime(activeItem.windowStartUtc)} – {formatLocalTime(activeItem.windowEndUtc)}
               </span>
-              <button className="tl-browser__player-close" onClick={() => setActiveItem(null)}>&times;</button>
+              <button className="tl-browser__player-close" onClick={() => setActiveItem(null)} aria-label="Close player">&times;</button>
             </div>
             <video
               key={activeItem.key}
@@ -187,6 +187,7 @@ export function TimelapseBrowser({ deviceId, onClose }: TimelapseBrowserProps) {
                   <button
                     className="tl-browser__row-play"
                     onClick={(e) => { e.stopPropagation(); setActiveItem(tl); }}
+                    aria-label={`Play ${tl.duration} timelapse`}
                   >
                     {isActive ? '▶' : '▷'}
                   </button>

@@ -4,8 +4,8 @@
   "description": "View AllSkyLabs edge device images, status, and timelapses",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
+  "background_color": "#060b16",
+  "theme_color": "#060b16",
   "icons": [
     {
       "src": "/icons/icon-192.svg",

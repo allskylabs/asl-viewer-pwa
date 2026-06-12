@@ -43,10 +43,12 @@ export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selec
             {captures.map((cap) => {
               const isSelected = cap.captureId === selectedId;
               return (
-                <div
+                <button
                   key={cap.captureId}
+                  type="button"
                   className={`image-grid__item${isSelected ? ' image-grid__item--selected' : ''}`}
                   onClick={() => onSelect(cap)}
+                  aria-pressed={isSelected}
                 >
                   <img
                     className="image-grid__thumb"
@@ -55,7 +57,7 @@ export const ImageHistoryGrid = memo(function ImageHistoryGrid({ captures, selec
                     loading="lazy"
                   />
                   <div className="image-grid__time">{formatTime(cap.timestamp)}</div>
-                </div>
+                </button>
               );
             })}
           </div>
