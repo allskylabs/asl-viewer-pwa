@@ -148,6 +148,47 @@ body {
   gap: var(--space-3);
 }
 
+/* View switch — placeholder for planned Weather/Astro experiences */
+.view-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.view-switch__group {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--bg-tertiary);
+}
+
+.view-switch__btn {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.view-switch__btn + .view-switch__btn {
+  border-left: 1px solid var(--border);
+}
+
+.view-switch__soon {
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.05rem 0.4rem;
+}
+
 .app-header__clock {
   font-size: 0.8rem;
   color: var(--text-secondary);
@@ -694,6 +735,18 @@ body {
   border-color: var(--accent);
 }
 
+/* ─── Skeleton shimmer ─── */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(100deg, var(--bg-tertiary) 40%, #1c2947 50%, var(--bg-tertiary) 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
 /* ─── Capture viewer ─── */
 .latest-image {
   display: flex;
@@ -715,6 +768,12 @@ body {
   height: 100%;
   object-fit: contain;
   display: block;
+}
+
+.latest-image__skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 
 .latest-image__meta {
@@ -764,6 +823,14 @@ body {
 .latest-image__tag--age {
   color: var(--text-muted);
   font-style: italic;
+}
+
+/* Capture older than expected cadence — quiet amber warning */
+.latest-image__tag--stale {
+  color: var(--yellow);
+  border-color: rgba(227, 179, 65, 0.3);
+  background: rgba(227, 179, 65, 0.08);
+  font-style: normal;
 }
 
 /* ─── Image history filmstrip ─── */
@@ -851,7 +918,8 @@ body {
   aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
-  background: var(--bg-primary);
+  /* static placeholder gradient — visible only until the image paints */
+  background: linear-gradient(115deg, var(--bg-primary) 30%, #111c33 50%, var(--bg-primary) 70%);
 }
 
 .image-grid__time {
@@ -1603,6 +1671,10 @@ details.meta-section > .metadata-grid {
   }
 
   .app-header__updated {
+    display: none;
+  }
+
+  .view-switch {
     display: none;
   }
 

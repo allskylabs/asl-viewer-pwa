@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-06-11
+
+### Added
+
+- Skeleton shimmer in the capture viewer while the full image loads (unmounts on load; respects `prefers-reduced-motion`).
+- Static gradient placeholder behind filmstrip thumbnails before they paint (no animation, so loaded thumbs cost nothing).
+- Stale-capture cue: the capture-age tag turns amber when the displayed capture is older than 15 minutes (`STALE_AGE_MIN` in `LatestImagePanel`).
+- Weather/Astro view switch placeholder in the header — disabled segmented control with a "Soon" badge, clearly marked as planned (per `docs/design-system.md`); hidden ≤700px.
+
 ## [0.4.0] - 2026-06-11
 
 ### Changed

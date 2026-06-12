@@ -19,6 +19,18 @@ export function AppHeader({ onRefresh, refreshing, lastRefreshedAt }: AppHeaderP
     <header className="app-header">
       <img src="/logo-horizontal.png" alt="AllskyLabs" className="app-header__logo" />
       <div className="app-header__actions">
+        <div
+          className="view-switch"
+          role="group"
+          aria-label="View mode — coming soon"
+          title="Weather and Astro views are coming soon"
+        >
+          <span className="view-switch__group">
+            <button type="button" className="view-switch__btn" disabled>Weather</button>
+            <button type="button" className="view-switch__btn" disabled>Astro</button>
+          </span>
+          <span className="view-switch__soon">Soon</span>
+        </div>
         <LiveClock />
         {onRefresh && (
           <>

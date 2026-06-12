@@ -1,5 +1,8 @@
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 import type { Capture } from '../types/viewer';
+
+/* Age beyond which the capture-age tag turns amber (minutes) */
+const STALE_AGE_MIN = 15;
 
 interface LatestImagePanelProps {
   capture: Capture | null;
@@ -38,6 +41,13 @@ export const LatestImagePanel = memo(function LatestImagePanel({
   onNewer,
   onJumpToLatest,
 }: LatestImagePanelProps) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const captureId = capture?.captureId;
+
+  useEffect(() => {
+    setImgLoaded(false);
+  }, [captureId]);
+
   if (!capture) {
     return (
       <div className="panel">
@@ -97,13 +107,28 @@ export const LatestImagePanel = memo(function LatestImagePanel({
       <div className="panel__body">
         <div className="latest-image">
           <div className="latest-image__viewer">
-            <img key={capture.captureId} src={capture.imageUrl} alt={`Capture ${capture.captureId}`} />
+            {!imgLoaded && <div className="latest-image__skeleton skeleton-shimmer" aria-hidden="true" />}
+            <img
+              key={capture.captureId}
+              src={capture.imageUrl}
+              alt={`Capture ${capture.captureId}`}
+              onLoad={() => setImgLoaded(true)}
+              ref={(el) => {
+                if (el?.complete && el.naturalWidth > 0) setImgLoaded(true);
+              }}
+            />
           </div>
           <div className="latest-image__meta">
             <span className="latest-image__tag">
               {formatTimestamp(capture.timestamp)}
             </span>
-            <span className="latest-image__tag latest-image__tag--age">
+            <span
+              className={`latest-image__tag latest-image__tag--age${
+                Date.now() - new Date(capture.timestamp).getTime() > STALE_AGE_MIN * 60_000
+                  ? ' latest-image__tag--stale'
+                  : ''
+              }`}
+            >
               {formatAge(capture.timestamp)}
             </span>
             {capture.mode && (

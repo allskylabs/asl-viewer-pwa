@@ -39,6 +39,17 @@ to data fetching, refresh, or navigation logic.
 - Version 0.3.1 → **0.4.0**, CHANGELOG entry added.
 - This progress file.
 
+### Checkpoint 3 — next-iteration items (v0.4.1)
+
+- Skeleton shimmer overlay in the capture viewer (`latest-image__skeleton` +
+  `skeleton-shimmer`); resets per capture, removed on image load.
+- Static gradient placeholder on filmstrip thumbs (deliberately not animated
+  — 30 thumbs animating forever would repaint constantly on mobile).
+- Amber stale cue on the capture-age tag when capture age > 15 min
+  (`STALE_AGE_MIN` in `LatestImagePanel.tsx`).
+- Header Weather/Astro segmented control as a **disabled placeholder** with a
+  "Soon" badge (no fake functionality); hidden at ≤700px.
+
 ## Build/test commands run
 
 - `npm run build` (tsc -b && vite build) — **passing** after checkpoint 1.
@@ -48,12 +59,12 @@ to data fetching, refresh, or navigation logic.
 
 - Mobile device list could become horizontal scroll chips instead of stacked
   cards (currently fine, just stacked).
-- Skeleton loaders for viewer image + filmstrip instead of text-only loading.
-- Stale-capture visual cue on the viewer itself (e.g., amber tint on the age
-  tag when age > capture interval).
-- Header Weather/Astro segmented control (placeholder-level, per design doc).
 - Consider extracting a `.btn` utility class family; current per-component
   button classes are consistent but duplicated.
+- Wire the Weather/Astro switch to real behavior (default-expanded metadata
+  sections, overlay defaults) when those experiences are designed.
+- Tune `STALE_AGE_MIN` (currently 15 min) once expected capture cadence is
+  known per device/mode — ideally derive from device config instead.
 
 ## Known issues
 
